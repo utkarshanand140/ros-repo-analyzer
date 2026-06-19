@@ -13,3 +13,13 @@ export interface WorkspaceSummary {
 export interface ParsedWorkspace {
   packages: RosPackage[];
 }
+
+export interface LaunchNode {
+  package: string;
+  executable: string;
+}
+
+export interface LaunchFile {
+  fileName: string;
+  nodes: LaunchNode[];
+}

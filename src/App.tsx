@@ -4,10 +4,20 @@ import UploadPanel from "./components/UploadPanel";
 import SummaryPanel from "./components/SummaryPanel";
 
 import { readZip } from "./utils/zipReader";
-import type { RosPackage } from "./types/ros";
+import type {
+  RosPackage,
+  LaunchFile,
+} from "./types/ros";
 
 import PackageList
   from "./components/PackageList";
+
+import LaunchFileViewer
+  from "./components/LaunchFileViewer";
+
+import {
+  parseLaunchFile,
+} from "./parsers/launchParser";
 
 import DependencyGraph
   from "./components/DependencyGraph";
@@ -41,10 +51,16 @@ function App() {
   const [packages, setPackages] =
   useState<RosPackage[]>([]);
 
+  const [launchFiles, setLaunchFiles] =
+  useState<LaunchFile[]>([]);
+
   async function handleUpload(file: File) {
     try {
       const files = await readZip(file);
       const parsedPackages: RosPackage[] = [];
+
+      const parsedLaunchFiles:
+LaunchFile[] = [];
 
       let packageCount = 0;
       let launchCount = 0;
@@ -72,6 +88,19 @@ function App() {
   }
 }
 
+if (type === "launch") {
+
+  const parsedLaunch =
+    parseLaunchFile(
+      file.path,
+      file.content
+    );
+
+  parsedLaunchFiles.push(
+    parsedLaunch
+  );
+}
+
         classifications.push({
           path: file.path,
           type,
@@ -97,6 +126,9 @@ function App() {
       }
 
       setPackages(parsedPackages);
+      setLaunchFiles(
+  parsedLaunchFiles
+);
 
       setClassifiedFiles(classifications);
 
@@ -110,6 +142,7 @@ function App() {
 
       setClassifiedFiles([]);
       setPackages([]);
+      setLaunchFiles([]);
 
       setSummary({
         packageCount: 0,
@@ -143,6 +176,12 @@ function App() {
 
 <DependencyGraph
   packages={packages}
+/>
+
+<LaunchFileViewer
+  launchFiles={
+    launchFiles
+  }
 />
 
       <div
