@@ -9,6 +9,9 @@ import type { RosPackage } from "./types/ros";
 import PackageList
   from "./components/PackageList";
 
+import DependencyGraph
+  from "./components/DependencyGraph";
+
 import {
   classifyFile,
   type FileType,
@@ -135,6 +138,10 @@ function App() {
 />
 
 <PackageList
+  packages={packages}
+/>
+
+<DependencyGraph
   packages={packages}
 />
 
