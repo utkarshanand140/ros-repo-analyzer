@@ -4,9 +4,11 @@ import UploadPanel from "./components/UploadPanel";
 import SummaryPanel from "./components/SummaryPanel";
 
 import { readZip } from "./utils/zipReader";
+
 import type {
   RosPackage,
   LaunchFile,
+  UrdfModel,
 } from "./types/ros";
 
 import PackageList
@@ -18,6 +20,13 @@ import LaunchFileViewer
 import {
   parseLaunchFile,
 } from "./parsers/launchParser";
+
+import {
+  parseUrdf,
+} from "./parsers/urdfParser";
+
+import UrdfViewer
+  from "./components/UrdfViewer";
 
 import DependencyGraph
   from "./components/DependencyGraph";
@@ -54,6 +63,10 @@ function App() {
   const [launchFiles, setLaunchFiles] =
   useState<LaunchFile[]>([]);
 
+  const [urdfModels,
+  setUrdfModels] =
+  useState<UrdfModel[]>([]);
+
   async function handleUpload(file: File) {
     try {
       const files = await readZip(file);
@@ -61,6 +74,9 @@ function App() {
 
       const parsedLaunchFiles:
 LaunchFile[] = [];
+
+      const parsedUrdfs:
+UrdfModel[] = [];
 
       let packageCount = 0;
       let launchCount = 0;
@@ -101,6 +117,22 @@ if (type === "launch") {
   );
 }
 
+if (
+  type === "urdf" ||
+  type === "xacro"
+) {
+
+  const parsedUrdf =
+    parseUrdf(
+      file.path,
+      file.content
+    );
+
+  parsedUrdfs.push(
+    parsedUrdf
+  );
+}
+
         classifications.push({
           path: file.path,
           type,
@@ -126,11 +158,16 @@ if (type === "launch") {
       }
 
       setPackages(parsedPackages);
-      setLaunchFiles(
+
+setLaunchFiles(
   parsedLaunchFiles
 );
 
-      setClassifiedFiles(classifications);
+setUrdfModels(
+  parsedUrdfs
+);
+
+setClassifiedFiles(classifications);
 
       setSummary({
         packageCount,
@@ -143,6 +180,7 @@ if (type === "launch") {
       setClassifiedFiles([]);
       setPackages([]);
       setLaunchFiles([]);
+      setUrdfModels([]);
 
       setSummary({
         packageCount: 0,
@@ -181,6 +219,12 @@ if (type === "launch") {
 <LaunchFileViewer
   launchFiles={
     launchFiles
+  }
+/>
+
+<UrdfViewer
+  models={
+    urdfModels
   }
 />
 

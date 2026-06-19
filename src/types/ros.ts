@@ -23,3 +23,15 @@ export interface LaunchFile {
   fileName: string;
   nodes: LaunchNode[];
 }
+
+export interface UrdfJoint {
+  parent: string;
+  child: string;
+}
+
+export interface UrdfModel {
+  fileName: string;
+  robotName: string;
+  links: string[];
+  joints: UrdfJoint[];
+}
