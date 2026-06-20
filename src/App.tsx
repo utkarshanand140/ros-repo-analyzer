@@ -60,6 +60,10 @@ function App() {
   const [classifiedFiles, setClassifiedFiles] =
     useState<ClassifiedFile[]>([]);
 
+    const [showDebug,
+  setShowDebug] =
+  useState(false);
+
   const [packages, setPackages] =
   useState<RosPackage[]>([]);
 
@@ -302,6 +306,33 @@ setClassifiedFiles(classifications);
   }
 />
 
+<div
+  style={{
+    marginTop: "2rem",
+    marginBottom: "1rem",
+  }}
+>
+  <label>
+    <input
+      type="checkbox"
+      checked={
+        showDebug
+      }
+      onChange={(e) =>
+        setShowDebug(
+          e.target.checked
+        )
+      }
+    />
+
+    {" "}
+    Show Debug
+    Information
+  </label>
+</div>
+
+      
+  {showDebug && (
       <div
         style={{
           marginTop: "2rem",
@@ -356,7 +387,7 @@ setClassifiedFiles(classifications);
             )}
           </tbody>
         </table>
-      </div>
+      </div> )}
     </div>
   );
 }
