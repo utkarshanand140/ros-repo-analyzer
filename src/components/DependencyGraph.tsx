@@ -105,15 +105,15 @@ export default function DependencyGraph({
   return (
     <div
       style={{
-        height: "700px",
-        marginTop: "2rem",
-        border:
-          "1px solid #ccc",
-        overflow: "hidden",
-        borderRadius: "12px",
-        background: "#0f172a"
-
-      }}
+  height: "800px",
+  marginTop: "2rem",
+  border: "1px solid #1e293b",
+  overflow: "hidden",
+  borderRadius: "24px",
+  background: "#020617",
+  boxShadow:
+    "0 20px 50px rgba(0,0,0,0.4)",
+}}
     >
       <ReactFlow
         nodes={nodes}

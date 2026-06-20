@@ -3,70 +3,60 @@ import type {
 } from "../types/diagnostics";
 
 interface Props {
-  diagnostics:
-    Diagnostic[];
+  diagnostics: Diagnostic[];
 }
 
-export default function
-DiagnosticsPanel({
+export default function DiagnosticsPanel({
   diagnostics,
 }: Props) {
-
   return (
-    <div
-      style={{
-        marginTop: "2rem",
-      }}
-    >
-      <h2>
+    <div className="rounded-3xl bg-slate-900 border border-slate-800 p-6">
+      <h2 className="text-2xl font-bold text-white mb-6">
         Diagnostics
       </h2>
 
-      {diagnostics
-        .length === 0 && (
-        <p>
-          No issues
-          detected.
-        </p>
+      {diagnostics.length === 0 && (
+        <div
+          className="
+            rounded-2xl
+            border
+            border-green-700
+            bg-green-950
+            p-4
+            text-green-300
+          "
+        >
+          ✅ No issues detected
+        </div>
       )}
 
-      {diagnostics.map(
-        (
-          diagnostic,
-          index
-        ) => (
-          <div
-            key={index}
-            style={{
-              padding:
-                "0.75rem",
-              marginBottom:
-                "0.5rem",
-              border:
-                "1px solid #ccc",
-              borderRadius:
-                "8px",
-              background:
-                diagnostic.severity ===
-                "error"
-                  ? "#ffe5e5"
-                  : "#fff8e5",
-            }}
-          >
-            <strong>
-              {diagnostic
-                .severity
-                .toUpperCase()}
-            </strong>
+      <div className="space-y-3">
+        {diagnostics.map(
+          (diagnostic, index) => (
+            <div
+              key={index}
+              className={`
+                rounded-2xl
+                p-4
+                border
+                ${
+                  diagnostic.severity === "error"
+                    ? "bg-red-950 border-red-700"
+                    : "bg-yellow-950 border-yellow-700"
+                }
+              `}
+            >
+              <div className="font-bold text-white mb-2">
+                {diagnostic.severity.toUpperCase()}
+              </div>
 
-            <br />
-
-            {
-              diagnostic.message
-            }
-          </div>
-        )
-      )}
+              <div className="text-slate-300">
+                {diagnostic.message}
+              </div>
+            </div>
+          )
+        )}
+      </div>
     </div>
   );
 }

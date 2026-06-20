@@ -219,13 +219,8 @@ setDiagnostics(
   }
 
   return (
-    <div
-      style={{
-        maxWidth: "1200px",
-        margin: "0 auto",
-        padding: "2rem",
-      }}
-    >
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="mb-10 rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 shadow-2xl">
   <h1 className="text-5xl font-bold text-white">
     ROS Workspace Analyzer
@@ -236,7 +231,7 @@ setDiagnostics(
     robot descriptions and workspace health in seconds.
   </p>
 </div>
-<hr />
+
       <OverviewDashboard metrics={metrics} />
       
       <hr />
@@ -249,9 +244,9 @@ setDiagnostics(
       <DependencyGraph packages={packages} />
 
       <LaunchFileViewer launchFiles={launchFiles} />
-<hr />
+
       <UrdfViewer models={urdfModels} />
-<hr />
+
       <DiagnosticsPanel
   diagnostics={
     diagnostics
@@ -323,7 +318,8 @@ setDiagnostics(
           </table>
         </div>
       )}
-    </div>
+     </div>
+  </div>
   );
 }
 
