@@ -226,10 +226,20 @@ setDiagnostics(
         padding: "2rem",
       }}
     >
-      <h1>ROS Repository Analyzer</h1>
+      <div className="mb-10 rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-8 shadow-2xl">
+  <h1 className="text-5xl font-bold text-white">
+    ROS Workspace Analyzer
+  </h1>
 
+  <p className="mt-4 text-lg text-blue-100">
+    Analyze ROS2 repositories, launch systems, package dependencies,
+    robot descriptions and workspace health in seconds.
+  </p>
+</div>
+<hr />
       <OverviewDashboard metrics={metrics} />
-
+      
+      <hr />
       <UploadPanel onFileSelected={handleUpload} />
 
       <SummaryPanel summary={summary} />
@@ -239,9 +249,9 @@ setDiagnostics(
       <DependencyGraph packages={packages} />
 
       <LaunchFileViewer launchFiles={launchFiles} />
-
+<hr />
       <UrdfViewer models={urdfModels} />
-
+<hr />
       <DiagnosticsPanel
   diagnostics={
     diagnostics

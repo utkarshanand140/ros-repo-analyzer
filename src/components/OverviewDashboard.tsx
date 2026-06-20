@@ -26,8 +26,8 @@ OverviewDashboard({
         marginBottom: "2rem",
       }}
     >
-      <h2>
-        Workspace Overview
+ <h2>
+        Overview Dashboard
       </h2>
 
       <div

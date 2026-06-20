@@ -25,7 +25,7 @@ export function parsePackageXml(
       ...xml.querySelectorAll("depend"),
       ...xml.querySelectorAll("exec_depend"),
       ...xml.querySelectorAll("build_depend"),
-      ...xml.querySelectorAll("test_depend"),
+      // ...xml.querySelectorAll("test_depend"),
     ];
 
     const dependencies = dependencyNodes
