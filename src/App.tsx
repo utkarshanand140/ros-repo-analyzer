@@ -17,6 +17,9 @@ import PackageList
 import LaunchFileViewer
   from "./components/LaunchFileViewer";
 
+import OverviewDashboard
+  from "./components/OverviewDashboard";
+
 import {
   parseLaunchFile,
 } from "./parsers/launchParser";
@@ -66,6 +69,20 @@ function App() {
   const [urdfModels,
   setUrdfModels] =
   useState<UrdfModel[]>([]);
+
+  const [metrics,
+  setMetrics] =
+  useState({
+    packageCount: 0,
+    launchFileCount: 0,
+    urdfCount: 0,
+
+    dependencyCount: 0,
+    launchNodeCount: 0,
+
+    linkCount: 0,
+    jointCount: 0,
+  });
 
   async function handleUpload(file: File) {
     try {
@@ -167,6 +184,59 @@ setUrdfModels(
   parsedUrdfs
 );
 
+const dependencyCount =
+  parsedPackages.reduce(
+    (sum, pkg) =>
+      sum +
+      pkg.dependencies
+        .length,
+    0
+  );
+
+const launchNodeCount =
+  parsedLaunchFiles.reduce(
+    (sum, launch) =>
+      sum +
+      launch.nodes
+        .length,
+    0
+  );
+
+const linkCount =
+  parsedUrdfs.reduce(
+    (sum, model) =>
+      sum +
+      model.links.length,
+    0
+  );
+
+const jointCount =
+  parsedUrdfs.reduce(
+    (sum, model) =>
+      sum +
+      model.joints.length,
+    0
+  );
+
+setMetrics({
+  packageCount:
+    parsedPackages.length,
+
+  launchFileCount:
+    parsedLaunchFiles.length,
+
+  urdfCount:
+    parsedUrdfs.length,
+
+  dependencyCount,
+
+  launchNodeCount,
+
+  linkCount,
+
+  jointCount,
+});
+
 setClassifiedFiles(classifications);
 
       setSummary({
@@ -200,6 +270,10 @@ setClassifiedFiles(classifications);
     >
       <h1>ROS Repository Analyzer</h1>
 
+      <OverviewDashboard
+  metrics={metrics}
+/>
+      
       <UploadPanel
         onFileSelected={handleUpload}
       />

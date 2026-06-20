@@ -35,3 +35,15 @@ export interface UrdfModel {
   links: string[];
   joints: UrdfJoint[];
 }
+
+export interface WorkspaceMetrics {
+  packageCount: number;
+  launchFileCount: number;
+  urdfCount: number;
+
+  dependencyCount: number;
+  launchNodeCount: number;
+
+  linkCount: number;
+  jointCount: number;
+}
