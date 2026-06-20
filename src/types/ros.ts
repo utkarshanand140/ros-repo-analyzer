@@ -22,6 +22,8 @@ export interface LaunchNode {
 export interface LaunchFile {
   fileName: string;
   nodes: LaunchNode[];
+  includedLaunchFiles:
+    string[];
 }
 
 export interface UrdfJoint {
@@ -46,4 +48,14 @@ export interface WorkspaceMetrics {
 
   linkCount: number;
   jointCount: number;
+}
+
+export interface RobotTreeNode {
+  name: string;
+  children: RobotTreeNode[];
+}
+
+export interface LaunchTreeNode {
+  name: string;
+  children: LaunchTreeNode[];
 }

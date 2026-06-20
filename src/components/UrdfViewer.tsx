@@ -2,6 +2,13 @@ import type {
   UrdfModel,
 } from "../types/ros";
 
+import RobotTree
+  from "./RobotTree";
+
+import {
+  buildRobotTree,
+} from "../utils/buildRobotTree";
+
 interface Props {
   models:
     UrdfModel[];
@@ -23,7 +30,14 @@ UrdfViewer({
       </h2>
 
       {models.map(
-        (model) => (
+  (model) => {
+
+    const tree =
+      buildRobotTree(
+        model
+      );
+
+    return (
           <div
             key={
               model.fileName
@@ -63,33 +77,26 @@ UrdfViewer({
               }
             </p>
 
-            <ul>
-              {model.joints.map(
-                (
-                  joint,
-                  index
-                ) => (
-                  <li
-                    key={
-                      index
-                    }
-                  >
-                    {
-                      joint.parent
-                    }
+            
 
-                    {" → "}
+            <h4>
+  Robot Tree
+</h4>
 
-                    {
-                      joint.child
-                    }
-                  </li>
-                )
-              )}
-            </ul>
+{tree ? (
+  <RobotTree
+    node={tree}
+  />
+) : (
+  <p>
+    No root link
+    detected
+  </p>
+)}
           </div>
-        )
-      )}
+        );
+})
+}
     </div>
   );
 }

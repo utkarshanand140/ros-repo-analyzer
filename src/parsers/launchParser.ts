@@ -9,6 +9,8 @@ export function parseLaunchFile(
 ): LaunchFile {
 
   const nodes: LaunchNode[] = [];
+  const includedLaunchFiles:
+  string[] = [];
 
   const nodeRegex =
     /Node\s*\([\s\S]*?package\s*=\s*["']([^"']+)["'][\s\S]*?executable\s*=\s*["']([^"']+)["'][\s\S]*?\)/g;
@@ -28,8 +30,28 @@ export function parseLaunchFile(
     });
   }
 
+  const includeRegex =
+  /['"]([^'"]+\.launch\.(?:py|xml))['"]/g;
+
+let includeMatch;
+
+while (
+  (
+    includeMatch =
+      includeRegex.exec(
+        content
+      )
+  ) !== null
+) {
+
+  includedLaunchFiles.push(
+    includeMatch[1]
+  );
+}
+
   return {
-    fileName,
-    nodes,
-  };
+  fileName,
+  nodes,
+  includedLaunchFiles,
+};
 }

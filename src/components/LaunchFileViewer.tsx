@@ -2,6 +2,13 @@ import type {
   LaunchFile,
 } from "../types/ros";
 
+import LaunchTree
+  from "./LaunchTree";
+
+import {
+  buildLaunchTree,
+} from "../utils/buildLaunchTree";
+
 interface Props {
   launchFiles:
     LaunchFile[];
@@ -23,7 +30,14 @@ LaunchFileViewer({
       </h2>
 
       {launchFiles.map(
-        (file) => (
+        (file) => {
+
+  const tree =
+    buildLaunchTree(
+      file
+    );
+
+  return (
           <div
             key={
               file.fileName
@@ -44,6 +58,39 @@ LaunchFileViewer({
                 file.fileName
               }
             </h3>
+
+            <h4>
+  Launch Hierarchy
+</h4>
+
+<LaunchTree
+  node={tree}
+/>
+
+            {file.includedLaunchFiles
+  .length > 0 && (
+
+  <>
+    <strong>
+      Includes:
+    </strong>
+
+    <ul>
+      {file.includedLaunchFiles.map(
+        (
+          included,
+          index
+        ) => (
+          <li
+            key={index}
+          >
+            {included}
+          </li>
+        )
+      )}
+    </ul>
+  </>
+)}
 
             {file.nodes
               .length ===
@@ -81,8 +128,9 @@ LaunchFileViewer({
               )}
             </ul>
           </div>
-        )
-      )}
+        );
+})
+}
     </div>
   );
 }
