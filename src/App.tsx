@@ -5,44 +5,38 @@ import SummaryPanel from "./components/SummaryPanel";
 
 import { readZip } from "./utils/zipReader";
 
+import type { RosPackage, LaunchFile, UrdfModel } from "./types/ros";
+
+import PackageList from "./components/PackageList";
+
+import LaunchFileViewer from "./components/LaunchFileViewer";
+
+import OverviewDashboard from "./components/OverviewDashboard";
+
+import { parseLaunchFile } from "./parsers/launchParser";
+
+import { parseUrdf } from "./parsers/urdfParser";
+
+import DiagnosticsPanel
+  from "./components/DiagnosticsPanel";
+
+import {
+  runDiagnostics,
+} from "./diagnostics/diagnostics";
+
 import type {
-  RosPackage,
-  LaunchFile,
-  UrdfModel,
-} from "./types/ros";
+  Diagnostic,
+} from "./types/diagnostics";
 
-import PackageList
-  from "./components/PackageList";
+import UrdfViewer from "./components/UrdfViewer";
 
-import LaunchFileViewer
-  from "./components/LaunchFileViewer";
+import DependencyGraph from "./components/DependencyGraph";
 
-import OverviewDashboard
-  from "./components/OverviewDashboard";
-
-import {
-  parseLaunchFile,
-} from "./parsers/launchParser";
-
-import {
-  parseUrdf,
-} from "./parsers/urdfParser";
-
-import UrdfViewer
-  from "./components/UrdfViewer";
-
-import DependencyGraph
-  from "./components/DependencyGraph";
-
-import {
-  classifyFile,
-  type FileType,
-} from "./parsers/fileClassifier";
+import { classifyFile, type FileType } from "./parsers/fileClassifier";
 
 import type { WorkspaceSummary } from "./types/ros";
 
-import { parsePackageXml }
-  from "./parsers/packageParser";
+import { parsePackageXml } from "./parsers/packageParser";
 
 interface ClassifiedFile {
   path: string;
@@ -50,33 +44,23 @@ interface ClassifiedFile {
 }
 
 function App() {
-  const [summary, setSummary] =
-    useState<WorkspaceSummary>({
-      packageCount: 0,
-      launchCount: 0,
-      urdfCount: 0,
-    });
+  const [summary, setSummary] = useState<WorkspaceSummary>({
+    packageCount: 0,
+    launchCount: 0,
+    urdfCount: 0,
+  });
 
-  const [classifiedFiles, setClassifiedFiles] =
-    useState<ClassifiedFile[]>([]);
+  const [classifiedFiles, setClassifiedFiles] = useState<ClassifiedFile[]>([]);
 
-    const [showDebug,
-  setShowDebug] =
-  useState(false);
+  const [showDebug, setShowDebug] = useState(false);
 
-  const [packages, setPackages] =
-  useState<RosPackage[]>([]);
+  const [packages, setPackages] = useState<RosPackage[]>([]);
 
-  const [launchFiles, setLaunchFiles] =
-  useState<LaunchFile[]>([]);
+  const [launchFiles, setLaunchFiles] = useState<LaunchFile[]>([]);
 
-  const [urdfModels,
-  setUrdfModels] =
-  useState<UrdfModel[]>([]);
+  const [urdfModels, setUrdfModels] = useState<UrdfModel[]>([]);
 
-  const [metrics,
-  setMetrics] =
-  useState({
+  const [metrics, setMetrics] = useState({
     packageCount: 0,
     launchFileCount: 0,
     urdfCount: 0,
@@ -88,16 +72,20 @@ function App() {
     jointCount: 0,
   });
 
+  const [diagnostics,
+  setDiagnostics] =
+  useState<
+    Diagnostic[]
+  >([]);
+
   async function handleUpload(file: File) {
     try {
       const files = await readZip(file);
       const parsedPackages: RosPackage[] = [];
 
-      const parsedLaunchFiles:
-LaunchFile[] = [];
+      const parsedLaunchFiles: LaunchFile[] = [];
 
-      const parsedUrdfs:
-UrdfModel[] = [];
+      const parsedUrdfs: UrdfModel[] = [];
 
       let packageCount = 0;
       let launchCount = 0;
@@ -106,53 +94,27 @@ UrdfModel[] = [];
       const classifications: ClassifiedFile[] = [];
 
       for (const file of files) {
-        const type = classifyFile(
-          file.path,
-          file.content
-        );
+        const type = classifyFile(file.path, file.content);
 
         if (type === "package") {
+          const parsedPackage = parsePackageXml(file.content);
 
-  const parsedPackage =
-    parsePackageXml(
-      file.content
-    );
+          if (parsedPackage) {
+            parsedPackages.push(parsedPackage);
+          }
+        }
 
-  if (parsedPackage) {
-    parsedPackages.push(
-      parsedPackage
-    );
-  }
-}
+        if (type === "launch") {
+          const parsedLaunch = parseLaunchFile(file.path, file.content);
 
-if (type === "launch") {
+          parsedLaunchFiles.push(parsedLaunch);
+        }
 
-  const parsedLaunch =
-    parseLaunchFile(
-      file.path,
-      file.content
-    );
+        if (type === "urdf" || type === "xacro") {
+          const parsedUrdf = parseUrdf(file.path, file.content);
 
-  parsedLaunchFiles.push(
-    parsedLaunch
-  );
-}
-
-if (
-  type === "urdf" ||
-  type === "xacro"
-) {
-
-  const parsedUrdf =
-    parseUrdf(
-      file.path,
-      file.content
-    );
-
-  parsedUrdfs.push(
-    parsedUrdf
-  );
-}
+          parsedUrdfs.push(parsedUrdf);
+        }
 
         classifications.push({
           path: file.path,
@@ -180,68 +142,59 @@ if (
 
       setPackages(parsedPackages);
 
-setLaunchFiles(
-  parsedLaunchFiles
+      setLaunchFiles(parsedLaunchFiles);
+
+      setUrdfModels(parsedUrdfs);
+
+      const dependencyCount = parsedPackages.reduce(
+        (sum, pkg) => sum + pkg.dependencies.length,
+        0
+      );
+
+      const launchNodeCount = parsedLaunchFiles.reduce(
+        (sum, launch) => sum + launch.nodes.length,
+        0
+      );
+
+      const linkCount = parsedUrdfs.reduce(
+        (sum, model) => sum + model.links.length,
+        0
+      );
+
+      const jointCount = parsedUrdfs.reduce(
+        (sum, model) => sum + model.joints.length,
+        0
+      );
+
+      const results =
+  runDiagnostics(
+    parsedPackages,
+    parsedLaunchFiles,
+    parsedUrdfs
+  );
+
+setDiagnostics(
+  results
 );
+      
+      
+      setMetrics({
+        packageCount: parsedPackages.length,
 
-setUrdfModels(
-  parsedUrdfs
-);
+        launchFileCount: parsedLaunchFiles.length,
 
-const dependencyCount =
-  parsedPackages.reduce(
-    (sum, pkg) =>
-      sum +
-      pkg.dependencies
-        .length,
-    0
-  );
+        urdfCount: parsedUrdfs.length,
 
-const launchNodeCount =
-  parsedLaunchFiles.reduce(
-    (sum, launch) =>
-      sum +
-      launch.nodes
-        .length,
-    0
-  );
+        dependencyCount,
 
-const linkCount =
-  parsedUrdfs.reduce(
-    (sum, model) =>
-      sum +
-      model.links.length,
-    0
-  );
+        launchNodeCount,
 
-const jointCount =
-  parsedUrdfs.reduce(
-    (sum, model) =>
-      sum +
-      model.joints.length,
-    0
-  );
+        linkCount,
 
-setMetrics({
-  packageCount:
-    parsedPackages.length,
+        jointCount,
+      });
 
-  launchFileCount:
-    parsedLaunchFiles.length,
-
-  urdfCount:
-    parsedUrdfs.length,
-
-  dependencyCount,
-
-  launchNodeCount,
-
-  linkCount,
-
-  jointCount,
-});
-
-setClassifiedFiles(classifications);
+      setClassifiedFiles(classifications);
 
       setSummary({
         packageCount,
@@ -255,6 +208,7 @@ setClassifiedFiles(classifications);
       setPackages([]);
       setLaunchFiles([]);
       setUrdfModels([]);
+      setDiagnostics([]);
 
       setSummary({
         packageCount: 0,
@@ -274,108 +228,79 @@ setClassifiedFiles(classifications);
     >
       <h1>ROS Repository Analyzer</h1>
 
-      <OverviewDashboard
-  metrics={metrics}
-/>
-      
-      <UploadPanel
-        onFileSelected={handleUpload}
-      />
+      <OverviewDashboard metrics={metrics} />
 
-      <SummaryPanel
-  summary={summary}
-/>
+      <UploadPanel onFileSelected={handleUpload} />
 
-<PackageList
-  packages={packages}
-/>
+      <SummaryPanel summary={summary} />
 
-<DependencyGraph
-  packages={packages}
-/>
+      <PackageList packages={packages} />
 
-<LaunchFileViewer
-  launchFiles={
-    launchFiles
+      <DependencyGraph packages={packages} />
+
+      <LaunchFileViewer launchFiles={launchFiles} />
+
+      <UrdfViewer models={urdfModels} />
+
+      <DiagnosticsPanel
+  diagnostics={
+    diagnostics
   }
 />
 
-<UrdfViewer
-  models={
-    urdfModels
-  }
-/>
-
-<div
-  style={{
-    marginTop: "2rem",
-    marginBottom: "1rem",
-  }}
->
-  <label>
-    <input
-      type="checkbox"
-      checked={
-        showDebug
-      }
-      onChange={(e) =>
-        setShowDebug(
-          e.target.checked
-        )
-      }
-    />
-
-    {" "}
-    Show Debug
-    Information
-  </label>
-</div>
-
-      
-  {showDebug && (
       <div
         style={{
           marginTop: "2rem",
+          marginBottom: "1rem",
         }}
       >
-        <h2>Detected Files</h2>
+        <label>
+          <input
+            type="checkbox"
+            checked={showDebug}
+            onChange={(e) => setShowDebug(e.target.checked)}
+          />{" "}
+          Show Debug Information
+        </label>
+      </div>
 
-        <table
-          border={1}
-          cellPadding={8}
+      {showDebug && (
+        <div
           style={{
-            width: "100%",
-            borderCollapse: "collapse",
+            marginTop: "2rem",
           }}
         >
-          <thead>
-            <tr>
-              <th>Path</th>
-              <th>Detected Type</th>
-            </tr>
-          </thead>
+          <h2>Detected Files</h2>
 
-          <tbody>
-            {classifiedFiles.map(
-              (file) => (
+          <table
+            border={1}
+            cellPadding={8}
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+            }}
+          >
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Detected Type</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {classifiedFiles.map((file) => (
                 <tr key={file.path}>
                   <td>{file.path}</td>
 
                   <td
                     style={{
-                      fontWeight:
-                        "bold",
+                      fontWeight: "bold",
                       color:
-                        file.type ===
-                        "package"
+                        file.type === "package"
                           ? "green"
-                          : file.type ===
-                            "launch"
+                          : file.type === "launch"
                           ? "blue"
-                          : file.type ===
-                              "urdf" ||
-                            file.type ===
-                              "xacro"
+                          : file.type === "urdf" || file.type === "xacro"
                           ? "orange"
                           : "gray",
                     }}
@@ -383,11 +308,11 @@ setClassifiedFiles(classifications);
                     {file.type}
                   </td>
                 </tr>
-              )
-            )}
-          </tbody>
-        </table>
-      </div> )}
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
